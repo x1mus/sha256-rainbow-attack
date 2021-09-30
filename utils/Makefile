@@ -1,5 +1,7 @@
 CC=g++
-all: sha256-main check-passwd gen-passwd
+EXEC=sha256-main check-passwd gen-passwd
+
+all: $(EXEC)
 
 sha256-main: sha256-main.o sha256.o
 	$(CC) -o $@ $^
@@ -21,5 +23,6 @@ check-passwd.o: check-passwd.cpp passwd-utils.hpp random.hpp sha256.h
 
 gen-passwd.o: gen-passwd.cpp passwd-utils.hpp random.hpp sha256.h
 	$(CC) -o $@ -c $<
+
 clean:
 	rm -rf *.o
