@@ -32,26 +32,28 @@ int main(int argc, char *argv[])
 
 
 void reduce_hash(std::string hash, int time_reduced, int passwd_length){
-
+	std::string new_password;
 	unsigned long long int reduction;
 	double number_of_passwd = pow(56.0, static_cast<double>(passwd_length));
-	std::string new_password;
 
 	hash.resize(16); // keep 16 first char of the string
-	reduction = std::strtoull(hash.c_str(), nullptr, 16);
-	std::cout << "reduction :" << reduction << std::endl;
-	reduction += time_reduced;
-	std::cout << "reduction :" << reduction << std::endl;
-	reduction = reduction % static_cast<unsigned long long int>(number_of_passwd);
-	std::cout << number_of_passwd << std::endl;
-	std::cout << reduction << std::endl;
-	new_password = std::to_string(reduction);
 
-	while (new_password.size() < 16) {
-		new_password += '0';
-	}
-	
+	reduction = std::strtoull(hash.c_str(), nullptr, 16);
+	reduction += time_reduced;
+	reduction = reduction % static_cast<unsigned long long int>(number_of_passwd);
+
+	new_password = padding_reduction(reduction, passwd_length);
 
 
 	//return reduction;
+}
+
+inline std::string padding_reduction(unsigned long long int reduction, int passwd_length) {
+	/*transform reduction into a string with a size of twice de password*/
+	std::string new_password = std::to_string(reduction);
+	std::string padding_chars= "0000000000000000";
+	int padding = reduction % (2 * passwd_length); // number of 0 to add to our password
+	new_password.insert(0, padding_chars, 0, padding);
+
+	return new_password;
 }
