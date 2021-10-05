@@ -1,10 +1,12 @@
 CC=g++
 EXEC=sha256-main check-passwd gen-passwd
+FLAGS = flags = -std=c++17 -Wpedantic -Wall -Wextra -Wconversion -Weffc++ -Wstrict-null-sentinel -Wold-style-cast -Wnoexcept -Wctor-dtor-privacy -Woverloaded-virtual -Wsign-promo -Wzero-as-null-pointer-constant -Wsuggest-final-types -Wsuggest-final-methods -Wsuggest-override
+
 
 all: $(EXEC)
 
 sha256-main: sha256-main.o sha256.o
-	$(CC) -o $@ $^
+	$(CC) -o $@ $^ 
 
 check-passwd: check-passwd.o sha256.o
 	$(CC) -o $@ $^
@@ -13,16 +15,16 @@ gen-passwd: gen-passwd.o sha256.o
 	$(CC) -o $@ $^
 
 sha256-main.o: sha256-main.cpp sha256.h
-	$(CC) -o $@ -c $<
+	$(CC) -o $@ -c $< $(FLAGS)
 
 sha256.o: sha256.cpp sha256.h
-	$(CC) -o $@ -c $<
+	$(CC) -o $@ -c $< $(FLAGS)
 
 check-passwd.o: check-passwd.cpp passwd-utils.hpp random.hpp sha256.h
-	$(CC) -o $@ -c $<
+	$(CC) -o $@ -c $< $(FLAGS)
 
 gen-passwd.o: gen-passwd.cpp passwd-utils.hpp random.hpp sha256.h
-	$(CC) -o $@ -c $<
+	$(CC) -o $@ -c $< $(FLAGS)
 
 clean:
 	rm -rf *.o
