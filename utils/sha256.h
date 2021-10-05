@@ -6,63 +6,73 @@
 
 #pragma once
 
-#include <array>
-#include <cstdint>
+//#include "hash.h"
 #include <string>
 
-class SHA256
+// define fixed size integer types
+#ifdef _MSC_VER
+// Windows
+typedef unsigned __int8  uint8_t;
+typedef unsigned __int32 uint32_t;
+typedef unsigned __int64 uint64_t;
+#else
+// GCC
+#include <stdint.h>
+#endif
+
+
+/// compute SHA256 hash
+/** Usage:
+    SHA256 sha256;
+    std::string myHash  = sha256("Hello World");     // std::string
+    std::string myHash2 = sha256("How are you", 11); // arbitrary data, 11 bytes
+
+    // or in a streaming fashion:
+
+    SHA256 sha256;
+    while (more data available)
+      sha256.add(pointer to fresh data, number of new bytes);
+    std::string myHash3 = sha256.getHash();
+  */
+class SHA256 //: public Hash
 {
 public:
-	/// split into 64 byte blocks (=> 512 bits), hash is 32 bytes long
-	static constexpr uint32_t BlockSize = 512 / 8;
-	static constexpr uint32_t HashBytes = 32;
+  /// split into 64 byte blocks (=> 512 bits), hash is 32 bytes long
+  enum { BlockSize = 512 / 8, HashBytes = 32 };
 
-	/// same as reset()
-	SHA256();
+  /// same as reset()
+  SHA256();
 
-	/// compute SHA256 of a memory block
-	std::string operator()(const void* data, size_t numBytes);
-	
-	/// compute SHA256 of a string, excluding final zero
-	std::string operator()(const std::string& text);
+  /// compute SHA256 of a memory block
+  std::string operator()(const void* data, size_t numBytes);
+  /// compute SHA256 of a string, excluding final zero
+  std::string operator()(const std::string& text);
 
-	template <size_t N>
-	inline void add(const std::array<uint8_t, N>& arr) {
-		add(arr.data(), arr.size());
-	}
-	
-	/// add arbitrary number of bytes
-	void add(const void* data, size_t numBytes);
+  /// add arbitrary number of bytes
+  void add(const void* data, size_t numBytes);
 
-	/// return latest hash as 64 hex characters
-	std::string getHashString();
+  /// return latest hash as 64 hex characters
+  std::string getHash();
+  /// return latest hash as bytes
+  void        getHash(unsigned char buffer[HashBytes]);
 
-	/// return latest hash as bytes
-	std::array<uint8_t, HashBytes> getHashBytes();
-
-	/// restart
-	void reset();
+  /// restart
+  void reset();
 
 private:
-	static constexpr uint32_t HashValues = HashBytes / 4;
-	
-	/// process 64 bytes
-	void processBlock(const void* data);
+  /// process 64 bytes
+  void processBlock(const void* data);
+  /// process everything left in the internal buffer
+  void processBuffer();
 
-	/// process everything left in the internal buffer
-	void processBuffer();
-	
-	/// bytes not processed yet
-	std::array<uint8_t, BlockSize> m_buffer;
+  /// size of processed data in bytes
+  uint64_t m_numBytes;
+  /// valid bytes in m_buffer
+  size_t   m_bufferSize;
+  /// bytes not processed yet
+  uint8_t  m_buffer[BlockSize];
 
-	/// valid bytes in m_buffer
-	size_t   m_bufferSize = 0;
-
-	/// size of processed data in bytes
-	uint64_t m_numBytes = 0;
-
-	/// hash, stored as integers
-	std::array<uint32_t, HashValues> m_hash;
+  enum { HashValues = HashBytes / 4 };
+  /// hash, stored as integers
+  uint32_t m_hash[HashValues];
 };
-
-std::string sha256(const std::string& s);
