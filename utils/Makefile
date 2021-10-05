@@ -9,7 +9,7 @@ sha256-main: sha256-main.o sha256.o
 check-passwd: check-passwd.o sha256.o
 	$(CC) -o $@ $^
 
-gen-passwd: gen-passwd.o sha256.o
+gen-passwd: gen-passwd.o sha256.o reduction.o
 	$(CC) -o $@ $^
 
 sha256-main.o: sha256-main.cpp sha256.h
@@ -21,7 +21,10 @@ sha256.o: sha256.cpp sha256.h
 check-passwd.o: check-passwd.cpp passwd-utils.hpp random.hpp sha256.h
 	$(CC) -o $@ -c $<
 
-gen-passwd.o: gen-passwd.cpp passwd-utils.hpp random.hpp sha256.h
+gen-passwd.o: gen-passwd.cpp passwd-utils.hpp random.hpp sha256.h reduction.hpp
+	$(CC) -o $@ -c $<
+
+reduction.o: reduction.cpp reduction.hpp
 	$(CC) -o $@ -c $<
 
 clean:
