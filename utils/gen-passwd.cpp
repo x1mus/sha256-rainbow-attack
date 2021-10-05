@@ -69,7 +69,7 @@ inline std::string reduced_hash_to_new_password(std::string& new_password_as_dig
 								 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 								 "0123456789"; // size 62
 
-	for(int pos = 0; pos < new_password_as_digits.size(); pos+=2) {
+	for(unsigned pos = 0; pos < new_password_as_digits.size(); pos+=2) {
 		pair_of_digits = std::stoi(new_password_as_digits.substr(pos, 2));
 		pair_of_digits %= 62;
 		new_password.push_back(allowed_chars[pair_of_digits]);

@@ -21,6 +21,7 @@ std::string generate_passwd(int length)
 
 void mass_generate(int n, int mc, int MC, const std::string& of_pwd, const std::string& of_hash)
 {
+	SHA256 sha256;
 	std::ofstream passwd_file;
 	passwd_file.open(of_pwd);
 
@@ -47,6 +48,7 @@ void mass_generate(int n, int mc, int MC, const std::string& of_pwd, const std::
 
 inline bool check_pwd(const std::string& pwd, const std::string& hash)
 {
+	SHA256 sha256;
 	return sha256(pwd) == hash;
 }
 
