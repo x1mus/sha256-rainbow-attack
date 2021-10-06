@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <cstring>
 #include "sha256.h"
 #include "reduction.hpp"
 #include "argparse.hpp"
@@ -44,14 +45,14 @@ int main(int argc, char *argv[]) {
 			unsigned nb_chains = program.get<unsigned>("--nb_chains");
 			unsigned length_chains = program.get<unsigned>("--length_chains");
 			unsigned psswd_length = program.get<unsigned>("--psswd_length");
-
+			unsigned password_length = 0;
 			SHA256 sha256;
 			std::string password;
 			std::string reduc;
 			std::ifstream passwd_table("psswd.txt");
 			std::ofstream RainbowTable("RT.csv");
-			try {
-				while (getline(passwd_table, password)){
+			while (getline(passwd_table, password)){
+				password_length = strlen(password.c_str());
 				RainbowTable << password.c_str() ;
 				RainbowTable << ";";
 				for(unsigned nbr_hash_red = 0; nbr_hash_red < nb_chains; ++nbr_hash_red){
@@ -59,12 +60,7 @@ int main(int argc, char *argv[]) {
 					password = sha256(reduc);
 				}
 				RainbowTable << reduc << std::endl;
-				}
-			} catch (...){
-				passwd_table.close();
-				RainbowTable.close();
 			}
-			
 			
 			passwd_table.close();
 			RainbowTable.close();
