@@ -5,7 +5,7 @@ FLAGS = -std=c++17 -Wall # -Wpedantic -Wextra -Wconversion -Weffc++ -Wstrict-nul
 
 all: $(EXEC)
 
-main: main.o
+main: main.o sha256.o reduction.o
 	$(CC) -o $@ $^ 
 
 sha256-main: sha256-main.o sha256.o
@@ -17,7 +17,7 @@ check-passwd: check-passwd.o sha256.o
 gen-passwd: gen-passwd.o sha256.o reduction.o
 	$(CC) -o $@ $^
 
-main.o: main.cpp argparse.hpp
+main.o: main.cpp argparse.hpp sha256.h reduction.hpp
 	$(CC) -o $@ -c $< $(FLAGS)
 
 sha256-main.o: sha256-main.cpp sha256.h
