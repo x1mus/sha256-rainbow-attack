@@ -3,16 +3,16 @@
 #include <cmath>
 #include "reduction.hpp"
 
-std::string reduce_hash(std::string hash, int time_reduced, int passwd_length){
+std::string reduce_hash(std::string& hash, int time_reduced, int passwd_length){
 	std::string new_password = "";
 	unsigned long long int reduction;
-	double number_of_passwd = pow(56.0, static_cast<double>(passwd_length));
+	unsigned long long number_of_passwd = std::lround(pow(56.0, static_cast<double>(passwd_length)));
 
 	hash.resize(16); // keep 16 first char of the string
 
 	reduction = std::strtoull(hash.c_str(), nullptr, 16);
 	reduction += time_reduced;
-	reduction = reduction % static_cast<unsigned long long int>(number_of_passwd);
+	reduction = reduction % number_of_passwd;
 	new_password.append(std::to_string(reduction));
 
 	padding_reduction(new_password, passwd_length);
