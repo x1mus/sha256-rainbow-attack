@@ -15,7 +15,12 @@ std::string reduce_hash(std::string& hash, int time_reduced, int passwd_length){
 	reduction = reduction % number_of_passwd;
 	new_password.append(std::to_string(reduction));
 
-	padding_reduction(new_password, passwd_length);
+	if (new_password.length() > 2 * passwd_length){
+		new_password.substr(0, 2 * passwd_length);
+	} else {
+		padding_reduction(new_password, passwd_length);
+	}
+
 	new_password = reduced_hash_to_new_password(new_password);
 	
 	return new_password;
@@ -23,8 +28,8 @@ std::string reduce_hash(std::string& hash, int time_reduced, int passwd_length){
 
 inline void padding_reduction(std::string& new_password, int passwd_length) {
 	/*transform reduction into a string with a size of twice de password*/
-	std::string padding_chars= "0000000000000000";
-	unsigned padding = (2 * passwd_length) - new_password.size(); // number of 0 to add to our password
+	std::string padding_chars= "000000000";
+	int padding = (2 * passwd_length) - new_password.size(); // number of 0 to add to our password
 	new_password.insert(0, padding_chars, 0, padding);
 
 }
