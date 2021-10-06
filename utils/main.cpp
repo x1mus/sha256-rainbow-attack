@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
+#include "sha256.h"
+#include "reduction.hpp"
 #include "argparse.hpp"
 
 int main(int argc, char *argv[]) {
@@ -38,10 +41,29 @@ int main(int argc, char *argv[]) {
 		
 		// MODE == GEN --> We test the presence of all arguments
 		if (program.is_used("--nb_chains") == true && program.is_used("--length_chains") == true && program.is_used("--psswd_length") == true) {
-			int nb_chains = program.get<int>("--nb_chains");
-			int length_chains = program.get<int>("--length_chains");
-			int psswd_length = program.get<int>("--psswd_length");
+			unsigned nb_chains = program.get<unsigned>("--nb_chains");
+			unsigned length_chains = program.get<unsigned>("--length_chains");
+			unsigned psswd_length = program.get<unsigned>("--psswd_length");
 
+			SHA256 sha256;
+			std::string reduction, password;
+			std::string output_hash;
+			std::ifstream passwd_table;
+			std::ofstream RainbowTable("RT.csv");
+
+			while (getline(passwd_table, password)){
+				output_hash = sha256(password);
+				RainbowTable << output_hash << ";";
+				reduction = reduce_hash(output_hash, 0, password.size());
+				for(unsigned hash_red = 1; hash_red < nb_chains; ++hash_red){
+					output_hash = sha256(reduction);
+					reduction = reduce_hash(output_hash, hash_red, reduction.size());
+				}
+				RainbowTable << reduction << ";";
+			}
+			
+			passwd_table.close();
+			RainbowTable.close();
 			// CONNECT TO THE DB
 			// GENERATE RAINBOW TABLE
 			// STORE RAINBOW TABLE
