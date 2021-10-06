@@ -16,9 +16,9 @@ int main(int argc, char *argv[]) {
 	program.add_argument("--atk").help("Launch an attack on a specified hash").default_value(false).implicit_value(true);
 
 	// "GEN" mode arguments
-	program.add_argument("-n", "--nb_chains").help("Specify the number of chains to generate (int)").scan<'i', int>();
-	program.add_argument("-l", "--length_chains").help("Specify the length of the chains to generate (int)").scan<'i', int>();
-	program.add_argument("-p", "--psswd_length").help("Specify the length of the passwords to generate (int)").scan<'i', int>();
+	program.add_argument("-n", "--nb_chains").help("Specify the number of chains to generate (int)").scan<'i', unsigned>();
+	program.add_argument("-l", "--length_chains").help("Specify the length of the chains to generate (int)").scan<'i', unsigned>();
+	program.add_argument("-p", "--psswd_length").help("Specify the length of the passwords to generate (int)").scan<'i', unsigned>();
 
 	// "ATK" mode arguments
 	program.add_argument("-s", "--sha256").help("Specify the hash to crack (str)");
@@ -46,21 +46,25 @@ int main(int argc, char *argv[]) {
 			unsigned psswd_length = program.get<unsigned>("--psswd_length");
 
 			SHA256 sha256;
-			std::string reduction, password;
-			std::string output_hash;
-			std::ifstream passwd_table;
+			std::string password;
+			std::string reduc;
+			std::ifstream passwd_table("psswd.txt");
 			std::ofstream RainbowTable("RT.csv");
-
-			while (getline(passwd_table, password)){
-				output_hash = sha256(password);
-				RainbowTable << output_hash << ";";
-				reduction = reduce_hash(output_hash, 0, password.size());
-				for(unsigned hash_red = 1; hash_red < nb_chains; ++hash_red){
-					output_hash = sha256(reduction);
-					reduction = reduce_hash(output_hash, hash_red, reduction.size());
+			try {
+				while (getline(passwd_table, password)){
+				RainbowTable << password.c_str() ;
+				RainbowTable << ";";
+				for(unsigned nbr_hash_red = 0; nbr_hash_red < nb_chains; ++nbr_hash_red){
+					reduc = reduce_hash(password, nbr_hash_red, password.size());
+					password = sha256(reduc);
 				}
-				RainbowTable << reduction << ";";
+				RainbowTable << reduc << std::endl;
+				}
+			} catch (...){
+				passwd_table.close();
+				RainbowTable.close();
 			}
+			
 			
 			passwd_table.close();
 			RainbowTable.close();
