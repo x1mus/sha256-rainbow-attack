@@ -3,7 +3,7 @@
 #include <cmath>
 #include "reduction.hpp"
 
-void reduce_hash(std::string hash, int time_reduced, int passwd_length){
+std::string reduce_hash(std::string hash, int time_reduced, int passwd_length){
 	std::string new_password = "";
 	unsigned long long int reduction;
 	double number_of_passwd = pow(56.0, static_cast<double>(passwd_length));
@@ -16,12 +16,9 @@ void reduce_hash(std::string hash, int time_reduced, int passwd_length){
 	new_password.append(std::to_string(reduction));
 
 	padding_reduction(new_password, passwd_length);
-	std::cout << new_password << std::endl;
 	new_password = reduced_hash_to_new_password(new_password);
-	std::cout << new_password << std::endl;
 	
-
-	//return reduction;
+	return new_password;
 }
 
 inline void padding_reduction(std::string& new_password, int passwd_length) {
