@@ -18,8 +18,14 @@ int main(int argc, char *argv[]) {
 	program.add_argument("--atk").help("Launch an attack on a specified hash").default_value(false).implicit_value(true);
 
 	// "GEN" mode arguments
+<<<<<<< HEAD
 	program.add_argument("-l", "--length_chains").help("Specify the length of the chains to generate (int)").scan<'i', unsigned>();
 	
+=======
+	program.add_argument("-n", "--nb_chains").help("Specify the number of chains to generate (int)").scan<'i', unsigned>();
+	program.add_argument("-l", "--length_chains").help("Specify the length of the chains to generate (int)").scan<'i', unsigned>();
+	program.add_argument("-r", "--rainbow_table").help("Specify the filename where you want the rainbow table to be generated (CSV)");
+>>>>>>> main
 	// "ATK" mode arguments
 	program.add_argument("-s", "--sha256").help("Specify the hash to crack (str)");
 	program.add_argument("-S", "--sha256_file").help("Specify a file containing hashs to crack");
@@ -53,6 +59,8 @@ int main(int argc, char *argv[]) {
 			program.is_used("--length_chains") == true &&
 			program.is_used("--rainbow_table") == true) {
 			
+			
+			unsigned nb_chains = program.get<unsigned>("--nb_chains");
 			unsigned length_chains = program.get<unsigned>("--length_chains");
 			unsigned password_length = 0;
 			SHA256 sha256;
@@ -74,6 +82,9 @@ int main(int argc, char *argv[]) {
 
 			passwd_table.close();
 			RainbowTable.close();
+			// CONNECT TO THE DB
+			// GENERATE RAINBOW TABLE
+			// STORE RAINBOW TABLE
 
 		} else {
 			std::cout << "Please specify all the required arguments : See README" << std::endl;
