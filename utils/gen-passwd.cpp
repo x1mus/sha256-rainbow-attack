@@ -26,5 +26,5 @@ int main(int argc, char *argv[])
 	int mc = std::stoi(argv[2]);
 	int MC = std::stoi(argv[3]);
 
-	rainbow::mass_generate(c, mc, MC, argv[4], argv[5]);
+	rainbow::mass_generate(c, mc, MC, argv[4]);
 }
