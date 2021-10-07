@@ -98,12 +98,13 @@ int main(int argc, char *argv[]) {
 			std::ifstream RainbowTable(rb_file);
 
 			if (hash.length() == 64) {
-				unsigned i = length_chains;
+				int i = length_chains;
 				std::string head = "";
 				while (i>=0 && head.empty()){
 
 					head = find_head(hash, RainbowTable, length_chains, i, password_length);
 					--i;
+					std::cout << "head " << i << " :" << hash << std::endl; 
 				}
 
 				if (head.empty()){
@@ -155,7 +156,7 @@ std::string find_head(std::string& hash, std::ifstream& rainbow_table, unsigned 
 	std::string tail_of_rainbow_table;
 	const char delimiter = ';';
 
-	if (length_chains == i){
+	if (length_chains == 0){
 		return "";
 	}
 
