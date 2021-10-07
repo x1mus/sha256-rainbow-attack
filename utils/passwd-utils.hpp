@@ -19,28 +19,23 @@ std::string generate_passwd(int length)
 	return std::string(str);
 }
 
-void mass_generate(int n, int mc, int MC, const std::string& of_pwd, const std::string& of_hash)
+void mass_generate(int n, int mc, int MC, const std::string& of_pwd)
 {
 	SHA256 sha256;
 	std::ofstream passwd_file;
 	passwd_file.open(of_pwd);
 
-	std::ofstream hash_file;
-	hash_file.open(of_hash);
 
-	if(passwd_file.is_open() && hash_file.is_open())
+	if(passwd_file.is_open())
 	{		
 		for(int i = 0; i < n; i++)
 		{
 			std::string pass = generate_passwd(rainbow::random(mc, MC));
 			passwd_file << pass << std::endl;
 
-			std::string hash = sha256(pass);
-			hash_file << hash << std::endl;
 		}
 
 		passwd_file.close();
-		hash_file.close();
 	}
 	else
 		throw std::runtime_error("Output files could not be opened");
