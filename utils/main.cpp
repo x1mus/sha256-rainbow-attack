@@ -19,8 +19,7 @@ int main(int argc, char *argv[]) {
 	// "GEN" mode arguments
 	program.add_argument("-n", "--nb_chains").help("Specify the number of chains to generate (int)").scan<'i', unsigned>();
 	program.add_argument("-l", "--length_chains").help("Specify the length of the chains to generate (int)").scan<'i', unsigned>();
-	program.add_argument("-p", "--psswd_length").help("Specify the length of the passwords to generate (int)").scan<'i', unsigned>();
-
+	program.add_argument("-r", "--rainbow_table").help("Specify the filename where you want the rainbow table to be generated (CSV)");
 	// "ATK" mode arguments
 	program.add_argument("-s", "--sha256").help("Specify the hash to crack (str)");
 
@@ -41,27 +40,29 @@ int main(int argc, char *argv[]) {
 	} else if (program["--gen"] == true) {
 		
 		// MODE == GEN --> We test the presence of all arguments
-		if (program.is_used("--nb_chains") == true && program.is_used("--length_chains") == true && program.is_used("--psswd_length") == true) {
+		if (program.is_used("--nb_chains") == true && 
+			program.is_used("--length_chains") == true &&
+			program.is_used("--rainbow_table") == true) {
+
 			unsigned nb_chains = program.get<unsigned>("--nb_chains");
 			unsigned length_chains = program.get<unsigned>("--length_chains");
-			unsigned psswd_length = program.get<unsigned>("--psswd_length");
 			unsigned password_length = 0;
 			SHA256 sha256;
 			std::string password;
 			std::string reduc;
 			std::ifstream passwd_table("psswd.txt");
-			std::ofstream RainbowTable("RT.csv");
+			std::ofstream RainbowTable(program.get<std::string>("--rainbow_table"));
 			while (getline(passwd_table, password)){
 				password_length = strlen(password.c_str());
 				RainbowTable << password.c_str() ;
 				RainbowTable << ";";
-				for(unsigned nbr_hash_red = 0; nbr_hash_red < nb_chains; ++nbr_hash_red){
+				for(unsigned nbr_hash_red = 0; nbr_hash_red < length_chains; ++nbr_hash_red){
 					reduc = reduce_hash(password, nbr_hash_red, password.size());
 					password = sha256(reduc);
 				}
 				RainbowTable << reduc << std::endl;
 			}
-			
+
 			passwd_table.close();
 			RainbowTable.close();
 			// CONNECT TO THE DB
