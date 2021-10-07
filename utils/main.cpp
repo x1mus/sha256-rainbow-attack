@@ -15,10 +15,6 @@ std::string find_head(std::string&, std::ifstream&, unsigned, unsigned, unsigned
 
 int main(int argc, char *argv[]) {
 	argparse::ArgumentParser program("rainbow_table");
-	unsigned length_chains;
-	std::string rb_file;
-	unsigned password_length;
-	
 
 	// Defining modes of working
 	program.add_argument("--gen").help("Generate the rainbow table").default_value(false).implicit_value(true);
@@ -39,15 +35,15 @@ int main(int argc, char *argv[]) {
 	// We try to parse all arguments, if an error occurs, we just display the help
 	try {
 		program.parse_args(argc, argv);
-		length_chains = program.get<unsigned>("--length_chains");
-		rb_file = program.get<std::string>("--rainbow_table");
-		password_length = program.get<unsigned>("--password_length");
-	}
-	catch (const std::runtime_error& err) {
+	} catch (const std::runtime_error& err) {
 		std::cout << err.what() << std::endl;
 		std::cout << program;
 		exit(0);
 	}
+
+	unsigned length_chains = program.get<unsigned>("--length_chains");
+	auto rb_file = program.get<std::string>("--rainbow_table");
+	unsigned password_length = program.get<unsigned>("--password_length");
 
 	// Figuring out which mode the user is using
 	if (program["--gen"] == true && program["--atk"] == true) {
@@ -64,25 +60,29 @@ int main(int argc, char *argv[]) {
 			SHA256 sha256;
 			std::string password;
 			std::string reduc;
+			std::string hash;
 			rainbow::mass_generate(nb_chains, password_length, password_length, "password.txt");
 			std::ifstream passwd_table("password.txt");
 			std::ofstream RainbowTable(rb_file);
 			while (getline(passwd_table, password)){
+				std::cout << "Password : " << password;
 				password_length = strlen(password.c_str());
-				RainbowTable << password.c_str() ;
+				RainbowTable << password.c_str();
 				RainbowTable << ";";
+				reduc = password;
 				for(unsigned nbr_hash_red = 0; nbr_hash_red < length_chains; ++nbr_hash_red){
-					reduc = reduce_hash(password, nbr_hash_red, password_length);
-					password = sha256(reduc);
+					hash = sha256(reduc);
+					//std::cout << "hash: " << password << std::endl;
+					reduc = reduce_hash(hash, nbr_hash_red, password_length);
+					//std::cout << "reduc: " << reduc << std::endl;
+					std::cout << " -> " << hash << " -> " << reduc;
 				}
+				std::cout << std::endl;
 				RainbowTable << reduc << std::endl;
 			}
 
 			passwd_table.close();
 			RainbowTable.close();
-			// CONNECT TO THE DB
-			// GENERATE RAINBOW TABLE
-			// STORE RAINBOW TABLE
 
 		} else {
 			std::cout << "Please specify all the required arguments : See README" << std::endl;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 		}
 
 	} else if (program["--atk"] == true) {
-		
+		std::cout << "in third if" << std::endl;
 		// MODE == ATK
 		if (program.is_used("--sha256") == true && program.is_used("--rainbow_table") == true) {
 			auto hash = program.get<std::string>("--sha256");
@@ -141,6 +141,7 @@ int main(int argc, char *argv[]) {
 		}
 
 	} else {
+		std::cout << "in else" << std::endl;
 		std::cout << program;
 	}
 	
