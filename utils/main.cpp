@@ -10,8 +10,15 @@
 #include "argparse.hpp"
 #include "passwd-utils.hpp"
 
+void find_corresponding_password(std::string&, std::string&, unsigned, unsigned);
+std::string find_head(std::string&, std::ifstream&, unsigned, unsigned, unsigned);
+
 int main(int argc, char *argv[]) {
 	argparse::ArgumentParser program("rainbow_table");
+	unsigned length_chains;
+	std::string rb_file;
+	unsigned password_length;
+	
 
 	// Defining modes of working
 	program.add_argument("--gen").help("Generate the rainbow table").default_value(false).implicit_value(true);
@@ -27,20 +34,20 @@ int main(int argc, char *argv[]) {
 	// BOTH mode arguments
 	program.add_argument("-n", "--nb_chains").help("Specify the number of chains to generate (int)").scan<'i', unsigned>();
 	program.add_argument("-r", "--rainbow_table").help("Specify the filename where you want the rainbow table to be generated (CSV)");
+	program.add_argument("-p", "--password_length").help("Specify password size").scan<'i', unsigned>();
 
 	// We try to parse all arguments, if an error occurs, we just display the help
 	try {
 		program.parse_args(argc, argv);
+		length_chains = program.get<unsigned>("--length_chains");
+		rb_file = program.get<std::string>("--rainbow_table");
+		password_length = program.get<unsigned>("--password_length");
 	}
 	catch (const std::runtime_error& err) {
 		std::cout << err.what() << std::endl;
 		std::cout << program;
 		exit(0);
 	}
-
-	// Global variables
-	unsigned nb_chains = program.get<unsigned>("--nb_chains");
-	auto rb_file = program.get<std::string>("--rainbow_table");
 
 	// Figuring out which mode the user is using
 	if (program["--gen"] == true && program["--atk"] == true) {
@@ -53,14 +60,11 @@ int main(int argc, char *argv[]) {
 			program.is_used("--length_chains") == true &&
 			program.is_used("--rainbow_table") == true) {
 			
-			
 			unsigned nb_chains = program.get<unsigned>("--nb_chains");
-			unsigned length_chains = program.get<unsigned>("--length_chains");
-			unsigned password_length = 0;
 			SHA256 sha256;
 			std::string password;
 			std::string reduc;
-			rainbow::mass_generate(nb_chains, 6, 8, "password.txt");
+			rainbow::mass_generate(nb_chains, password_length, password_length, "password.txt");
 			std::ifstream passwd_table("password.txt");
 			std::ofstream RainbowTable(rb_file);
 			while (getline(passwd_table, password)){
@@ -91,8 +95,25 @@ int main(int argc, char *argv[]) {
 		if (program.is_used("--sha256") == true && program.is_used("--rainbow_table") == true) {
 			auto hash = program.get<std::string>("--sha256");
 
+			std::ifstream RainbowTable(rb_file);
+
 			if (hash.length() == 64) {
-				//Do attack
+				unsigned i = length_chains;
+				std::string head = "";
+				while (i>=0 && head.empty()){
+
+					head = find_head(hash, RainbowTable, length_chains, i, password_length);
+					--i;
+				}
+
+				if (head.empty()){
+					std::cout << "password not found :/" << std::endl;
+				} else {
+					find_corresponding_password(head, hash,0, password_length);
+				}
+				
+				
+				
 
 			} else {
 				std::cout << "Hash value is incorrect. Only SHA256 is available" << std::endl;
@@ -124,4 +145,40 @@ int main(int argc, char *argv[]) {
 	}
 	
 	return 0;
+}
+
+
+std::string find_head(std::string& hash, std::ifstream& rainbow_table, unsigned length_chains, unsigned i, unsigned password_length) {
+	SHA256 sha256;
+	std::string reduction = reduce_hash(hash, i, password_length);
+	std::string rainbow_table_line;
+	std::string tail_of_rainbow_table;
+	const char delimiter = ';';
+
+	if (length_chains == i){
+		return "";
+	}
+
+	i++;
+	while(getline(rainbow_table, rainbow_table_line)){
+		tail_of_rainbow_table = rainbow_table_line.substr(rainbow_table_line.find(delimiter)+1);
+
+		if(reduction == rainbow_table_line){
+			return rainbow_table_line.substr(0, rainbow_table_line.find(delimiter));
+		}
+	}
+	reduction = sha256(reduction);
+
+	return find_head(reduction, rainbow_table, length_chains, i, password_length);
+}
+
+void find_corresponding_password(std::string& reduction, std::string& hash, unsigned i, unsigned password_length) {
+	SHA256 sha256;
+	std::string hashed = sha256(reduction);
+	if(hashed == hash) {
+		std::cout << "The corresponding password for " << hash << "is: " << reduction << std::endl;
+	} else {
+		hashed = reduce_hash(hashed, i, password_length);
+		find_corresponding_password(hashed, hash, ++i, password_length);
+	}
 }
