@@ -8,6 +8,7 @@
 #include "sha256.h"
 #include "reduction.hpp"
 #include "argparse.hpp"
+#include "passwd-utils.hpp"
 
 int main(int argc, char *argv[]) {
 	argparse::ArgumentParser program("rainbow_table");
@@ -43,21 +44,23 @@ int main(int argc, char *argv[]) {
 		if (program.is_used("--nb_chains") == true && 
 			program.is_used("--length_chains") == true &&
 			program.is_used("--rainbow_table") == true) {
-
+			
+			
 			unsigned nb_chains = program.get<unsigned>("--nb_chains");
 			unsigned length_chains = program.get<unsigned>("--length_chains");
 			unsigned password_length = 0;
 			SHA256 sha256;
 			std::string password;
 			std::string reduc;
-			std::ifstream passwd_table("psswd.txt");
+			rainbow::mass_generate(nb_chains, 6, 8, "password.txt");
+			std::ifstream passwd_table("password.txt");
 			std::ofstream RainbowTable(program.get<std::string>("--rainbow_table"));
 			while (getline(passwd_table, password)){
 				password_length = strlen(password.c_str());
 				RainbowTable << password.c_str() ;
 				RainbowTable << ";";
 				for(unsigned nbr_hash_red = 0; nbr_hash_red < length_chains; ++nbr_hash_red){
-					reduc = reduce_hash(password, nbr_hash_red, password.size());
+					reduc = reduce_hash(password, nbr_hash_red, password_length);
 					password = sha256(reduc);
 				}
 				RainbowTable << reduc << std::endl;
