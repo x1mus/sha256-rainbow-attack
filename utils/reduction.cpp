@@ -6,19 +6,24 @@
 std::string reduce_hash(std::string& hash, int time_reduced, int passwd_length){
 	std::string new_password = "";
 	unsigned long long int reduction;
-	unsigned long long number_of_passwd = std::lround(pow(56.0, static_cast<double>(passwd_length)));
+	unsigned long long number_of_passwd = std::lround(pow(62.0, static_cast<double>(passwd_length)));
 
 	hash.resize(16); // keep 16 first char of the string
 
+	// Conversion from hex to int
 	reduction = std::strtoull(hash.c_str(), nullptr, 16);
+	
+	// Doing formula
 	reduction += time_reduced;
 	reduction = reduction % number_of_passwd;
+	
+	// From int to ascii
 	new_password.append(std::to_string(reduction));
 
 	if (new_password.length() > 2 * passwd_length){
 		new_password.substr(0, 2 * passwd_length);
 	} else {
-		padding_reduction(new_password, passwd_length);
+		padding_reduction(new_password, passwd_length, time_reduced);
 	}
 
 	new_password = reduced_hash_to_new_password(new_password);
@@ -28,10 +33,10 @@ std::string reduce_hash(std::string& hash, int time_reduced, int passwd_length){
 
 inline void padding_reduction(std::string& new_password, int passwd_length) {
 	/*transform reduction into a string with a size of twice de password*/
-	std::string padding_chars= "000000000";
-	int padding = (2 * passwd_length) - new_password.size(); // number of 0 to add to our password
+	int padding = (2 * passwd_length) - new_password.size(); // number of padding to add
+	std::string padding_chars = new_password.substr(padding);
+	
 	new_password.insert(0, padding_chars, 0, padding);
-
 }
 
 inline std::string reduced_hash_to_new_password(std::string& new_password_as_digits){

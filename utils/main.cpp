@@ -65,19 +65,18 @@ int main(int argc, char *argv[]) {
 			std::ifstream passwd_table("password.txt");
 			std::ofstream RainbowTable(rb_file);
 			while (getline(passwd_table, password)){
-				std::cout << "Password : " << password;
+				//std::cout << "Password : " << password;
 				password_length = strlen(password.c_str());
 				RainbowTable << password.c_str();
 				RainbowTable << ";";
 				reduc = password;
 				for(unsigned nbr_hash_red = 0; nbr_hash_red < length_chains; ++nbr_hash_red){
 					hash = sha256(reduc);
-					//std::cout << "hash: " << password << std::endl;
 					reduc = reduce_hash(hash, nbr_hash_red, password_length);
-					//std::cout << "reduc: " << reduc << std::endl;
-					std::cout << " -> " << hash << " -> " << reduc;
+					//std::cout << " -> " << hash << " -> " << reduc;
+
 				}
-				std::cout << std::endl;
+				//std::cout << std::endl;
 				RainbowTable << reduc << std::endl;
 			}
 
