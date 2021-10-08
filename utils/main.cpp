@@ -41,10 +41,6 @@ int main(int argc, char *argv[]) {
 		exit(0);
 	}
 
-	unsigned length_chains = program.get<unsigned>("--length_chains");
-	auto rb_file = program.get<std::string>("--rainbow_table");
-	unsigned password_length = program.get<unsigned>("--password_length");
-
 	// Figuring out which mode the user is using
 	if (program["--gen"] == true && program["--atk"] == true) {
 		std::cout << "--gen and --atk can't be present at the same time" << std::endl;
@@ -54,9 +50,13 @@ int main(int argc, char *argv[]) {
 		// MODE == GEN --> We test the presence of all arguments
 		if (program.is_used("--nb_chains") == true && 
 			program.is_used("--length_chains") == true &&
-			program.is_used("--rainbow_table") == true) {
+			program.is_used("--rainbow_table") == true &&
+			program.is_used("--password_length") == true) {
 			
 			unsigned nb_chains = program.get<unsigned>("--nb_chains");
+			unsigned length_chains = program.get<unsigned>("--length_chains");
+			unsigned password_length = program.get<unsigned>("--password_length");
+			auto rb_file = program.get<std::string>("--rainbow_table");
 			SHA256 sha256;
 			std::string password;
 			std::string reduc;
@@ -89,10 +89,17 @@ int main(int argc, char *argv[]) {
 		}
 
 	} else if (program["--atk"] == true) {
-		std::cout << "in third if" << std::endl;
+		
 		// MODE == ATK
-		if (program.is_used("--sha256") == true && program.is_used("--rainbow_table") == true) {
+		if (program.is_used("--sha256") == true && 
+			program.is_used("--rainbow_table") == true &&
+			program.is_used("--length_chains") == true &&
+			program.is_used("--password_length") == true) {
+			
 			auto hash = program.get<std::string>("--sha256");
+			auto rb_file = program.get<std::string>("--rainbow_table");
+			unsigned length_chains = program.get<unsigned>("--length_chains");
+			unsigned password_length = program.get<unsigned>("--password_length");
 
 			std::ifstream RainbowTable(rb_file);
 
@@ -141,7 +148,7 @@ int main(int argc, char *argv[]) {
 		}
 
 	} else {
-		std::cout << "in else" << std::endl;
+		std::cout << "Please specify a mode of working [--gen/--atk]" << std::endl;
 		std::cout << program;
 	}
 	
