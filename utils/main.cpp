@@ -218,7 +218,6 @@ std::string find_head(std::string& hash, std::ifstream& rainbow_table, unsigned 
 #endif
 		
 		if(reduction.compare(tail_of_rainbow_table) == 0){
-			//std::cout << "success" << std::endl;
 			return rainbow_table_line.substr(0, rainbow_table_line.find(delimiter));
 		}
 	}
@@ -227,7 +226,6 @@ std::string find_head(std::string& hash, std::ifstream& rainbow_table, unsigned 
 	
 	reduction = sha256(reduction);
 
-	// std::cout << std::endl;
 	return find_head(reduction, rainbow_table, length_chains, i, password_length);
 }
 
