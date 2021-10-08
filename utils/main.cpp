@@ -13,11 +13,13 @@
 # define D(x)
 #endif
 
+void display_help(std::string&);
+void attack(std::string&, std::string&, unsigned, unsigned);
 void find_corresponding_password(std::string&, std::string&, unsigned, unsigned);
 std::string find_head(std::string&, std::ifstream&, unsigned, unsigned, unsigned);
 
 int main(int argc, char *argv[]) {
-	argparse::ArgumentParser program("rainbow_table");
+	argparse::ArgumentParser program("main");
 
 	// Defining modes of working
 	program.add_argument("--gen").help("Generate the rainbow table").default_value(false).implicit_value(true);
@@ -44,10 +46,11 @@ int main(int argc, char *argv[]) {
 		exit(0);
 	}
 
+	std::string program_help = program.help().str();
+
 	// Figuring out which mode the user is using
 	if (program["--gen"] == true && program["--atk"] == true) {
-		std::cout << "--gen and --atk can't be present at the same time" << std::endl;
-		std::cout << program;
+		display_help(program_help);
 	} else if (program["--gen"] == true) {
 		
 		// MODE == GEN --> We test the presence of all arguments
@@ -91,95 +94,102 @@ int main(int argc, char *argv[]) {
 			std::cout << program;
 		}
 
-	} else if (program["--atk"] == true) {
+	} else if (program["--atk"] == true &&
+		program.is_used("--rainbow_table") == true &&
+		program.is_used("--length_chains") == true &&
+		program.is_used("--password_length") == true) {
+
+		auto rb_file = program.get<std::string>("--rainbow_table");
+		unsigned length_chains = program.get<unsigned>("--length_chains");
+		unsigned password_length = program.get<unsigned>("--password_length");
 		
 		// MODE == ATK
-		if (program.is_used("--sha256") == true && 
-			program.is_used("--rainbow_table") == true &&
-			program.is_used("--length_chains") == true &&
-			program.is_used("--password_length") == true) {
-			
+		if (program.is_used("--sha256") == true) {
 			auto hash = program.get<std::string>("--sha256");
-			auto rb_file = program.get<std::string>("--rainbow_table");
-			unsigned length_chains = program.get<unsigned>("--length_chains");
-			unsigned password_length = program.get<unsigned>("--password_length");
 
-			std::ifstream RainbowTable(rb_file);
-
-			if (hash.length() == 64) {
-				int i = length_chains;
-				std::string head = "";
-#ifdef DEBUG
-				std::cout << "++++++++++++++++++++++++" << std::endl
-				          << "Trying to find head ... " << std::endl
-				          << "++++++++++++++++++++++++" << std::endl;
-#endif
-				while (i>=0 && head.empty()){
-#ifdef DEBUG
-					std::cout << "===============" << std::endl
-					          << "NEW WHILE ENTRY" << std::endl
-					          << "===============" << std::endl
-					          << "MAIN i : " << i << std::endl
-					          << "---------" << std::endl;
-#endif
-					head = find_head(hash, RainbowTable, length_chains, i, password_length);
-					--i;
-#ifdef DEBUG
-					std::cout << "------------" << std::endl
-					          << "MAIN HEAD : " << head << std::endl
-					          << "MAIN HASH : " << hash << std::endl
-					          << std::endl;
-#endif
-				}
-
-#ifdef DEBUG
-				std::cout << std::endl
-				          << "++++++++++++++++++++++++++++++++++++++++++" << std::endl
-				          << "Trying to find corresponding password ... " << std::endl
-				          << "++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-#endif
-				if (head.empty()){
-					std::cout << "password not found :/" << std::endl;
-				} else {
-					find_corresponding_password(head, hash,0, password_length);
-				}
-				
-				
-				
-
+			if (hash.size() == 64) {
+				attack(hash, rb_file, length_chains, password_length);
 			} else {
-				std::cout << "Hash value is incorrect. Only SHA256 is available" << std::endl;
-				std::cout << program;
+				std::cout << "Malformed hash" << std::endl;
 			}
 
-		} else if (program.is_used("--sha256_file") == true && program.is_used("--rainbow_table") == true) {
+		} else if (program.is_used("--sha256_file") == true) {
 			auto sha256_file = program.get<std::string>("--sha256_file");
 			std::ifstream to_crack(sha256_file);
+			std::string hash;
 
-			// Foreach hash in sha256_file
-			//if (hash.length() == 64) {
-				//Do attack
-
-			//} else {
-			//	std::cout << "Hash value is incorrect. Only SHA256 is available" << std::endl;
-			//	std::cout << program;
-			//}
+			while(getline(to_crack, hash)) {
+				if (hash.size() == 64) {
+					attack(hash, rb_file, length_chains, password_length);
+				} else {
+					std::cout << "Malformed hash" << std::endl;
+				}
+			}
 
 			to_crack.close();
 		
 		} else {
-			std::cout << "Please specify all the required arguments : See README" << std::endl;
-			std::cout << program;
+			display_help(program_help);
 		}
 
 	} else {
-		std::cout << "Please specify a mode of working [--gen/--atk]" << std::endl;
-		std::cout << program;
+		display_help(program_help);
 	}
 	
 	return 0;
 }
 
+void display_help(std::string& program) {
+	std::cout << "The correct way to use this program is :" << std::endl
+		<< "	./main --gen -r <rt.csv> -l <x> -p <x> -n <x>" << std::endl
+		<< "	./main --atk -r <rt.csv> -l <x> -p <x> -s <sha256>" << std::endl
+		<< "	./main --atk -r <rt.csv> -l <x> -p <x> -S <sha256_file>" << std::endl << std::endl;
+	std::cout << program;
+}
+
+void attack(std::string& hash, std::string& rb_file, unsigned length_chains, unsigned password_length) {
+
+	std::ifstream RainbowTable(rb_file);
+
+	int i = length_chains;
+	std::string head = "";
+
+#ifdef DEBUG
+	std::cout << "++++++++++++++++++++++++" << std::endl
+		<< "Trying to find head ... " << std::endl
+		<< "++++++++++++++++++++++++" << std::endl;
+#endif
+	while (i>=0 && head.empty()){
+#ifdef DEBUG
+		std::cout << "===============" << std::endl
+			<< "NEW WHILE ENTRY" << std::endl
+			<< "===============" << std::endl
+			<< "MAIN i : " << i << std::endl
+			<< "---------" << std::endl;
+#endif
+		head = find_head(hash, RainbowTable, length_chains, i, password_length);
+		--i;
+#ifdef DEBUG
+		std::cout << "------------" << std::endl
+			<< "MAIN HEAD : " << head << std::endl
+			<< "MAIN HASH : " << hash << std::endl
+			<< std::endl;
+#endif
+	}
+
+
+#ifdef DEBUG
+	std::cout << std::endl
+		<< "++++++++++++++++++++++++++++++++++++++++++" << std::endl
+		<< "Trying to find corresponding password ... " << std::endl
+		<< "++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+#endif
+	if (head.empty()){
+		std::cout << "password not found :/" << std::endl;
+	} else {
+		find_corresponding_password(head, hash,0, password_length);
+	}
+}
 
 std::string find_head(std::string& hash, std::ifstream& rainbow_table, unsigned length_chains, unsigned i, unsigned password_length) {
 #ifdef DEBUG
