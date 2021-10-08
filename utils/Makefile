@@ -6,7 +6,7 @@ FLAGS = -std=c++17 -Wall #-DDEBUG # -Wpedantic -Wextra -Wconversion -Weffc++ -Ws
 all: $(EXEC)
 
 main: main.o sha256.o reduction.o
-	$(CC) -o $@ $^ 
+	$(CC) -o $@ $^ -pthread
 
 sha256-main: sha256-main.o sha256.o reduction.o
 	$(CC) -o $@ $^

@@ -7,6 +7,8 @@
 #include "argparse.hpp"
 #include "passwd-utils.hpp"
 
+#include <thread>
+
 #ifdef DEBUG
 # define D(x) x
 #else
@@ -14,7 +16,7 @@
 #endif
 
 void display_help(std::string&);
-void attack(std::string&, std::string&, unsigned, unsigned);
+void attack(std::string, std::string, unsigned, unsigned);
 void find_corresponding_password(std::string&, std::string&, unsigned, unsigned);
 std::string find_head(std::string&, std::ifstream&, unsigned, unsigned, unsigned);
 
@@ -118,13 +120,24 @@ int main(int argc, char *argv[]) {
 			std::ifstream to_crack(sha256_file);
 			std::string hash;
 
+			std::thread myThreads[100];
+
+			unsigned i = 0;
 			while(getline(to_crack, hash)) {
 				if (hash.size() == 64) {
-					attack(hash, rb_file, length_chains, password_length);
+					myThreads[i] = std::thread(attack, hash, rb_file, length_chains, password_length);
+					//attack(hash, rb_file, length_chains, password_length);
 				} else {
 					std::cout << "Malformed hash" << std::endl;
 				}
+				i++;
 			}
+
+
+			while(i > 0) {
+       			myThreads[i-1].join();
+       			i--;
+    		}
 
 			to_crack.close();
 		
@@ -147,7 +160,7 @@ void display_help(std::string& program) {
 	std::cout << program;
 }
 
-void attack(std::string& hash, std::string& rb_file, unsigned length_chains, unsigned password_length) {
+void attack(std::string hash, std::string rb_file, unsigned length_chains, unsigned password_length) {
 
 	std::ifstream RainbowTable(rb_file);
 
