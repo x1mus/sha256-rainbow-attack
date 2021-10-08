@@ -44,11 +44,14 @@ inline void padding_reduction(std::string& new_password, int passwd_length) {
 	/*transform reduction into a string with a size of twice de password*/
 	//int padding = (2 * passwd_length) - new_password.size(); // number of padding to add
 	std::string padding_chars = "";
-	new_password += new_password;
+	while (new_password.size() < passwd_length*2) {
+    	new_password += new_password;
+	}
 	
 	try {
 		padding_chars = new_password.substr(new_password.size() - passwd_length*2);
 	} catch (std::out_of_range& err) {
+		std::cerr << err.what() << std::endl;
 		std::cout << "2/-------------" << std::endl;
 		std::cout << "passwd_length : " << passwd_length << std::endl;
 		std::cout << "new_password : " << new_password << std::endl;
