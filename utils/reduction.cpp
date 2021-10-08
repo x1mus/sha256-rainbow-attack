@@ -23,7 +23,7 @@ std::string reduce_hash(std::string& hash, int time_reduced, int passwd_length){
 	if (new_password.length() > 2 * passwd_length){
 		new_password.substr(0, 2 * passwd_length);
 	} else {
-		padding_reduction(new_password, passwd_length, time_reduced);
+		padding_reduction(new_password, passwd_length);
 	}
 
 	new_password = reduced_hash_to_new_password(new_password);
