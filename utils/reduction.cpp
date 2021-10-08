@@ -3,7 +3,7 @@
 #include <cmath>
 #include "reduction.hpp"
 
-std::string reduce_hash(std::string& hash, int time_reduced, int passwd_length){
+std::string reduce_hash(std::string hash, int time_reduced, int passwd_length){
 	std::string new_password = "";
 	unsigned long long int reduction;
 	unsigned long long number_of_passwd = std::lround(pow(62.0, static_cast<double>(passwd_length)));

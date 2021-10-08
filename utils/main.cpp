@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 			std::ifstream passwd_table("password.txt");
 			std::ofstream RainbowTable(rb_file);
 			while (getline(passwd_table, password)){
-				//std::cout << "Password : " << password;
+				std::cout << "Password : " << password;
 				password_length = strlen(password.c_str());
 				RainbowTable << password.c_str();
 				RainbowTable << ";";
@@ -73,10 +73,10 @@ int main(int argc, char *argv[]) {
 				for(unsigned nbr_hash_red = 0; nbr_hash_red < length_chains; ++nbr_hash_red){
 					hash = sha256(reduc);
 					reduc = reduce_hash(hash, nbr_hash_red, password_length);
-					//std::cout << " -> " << hash << " -> " << reduc;
+					std::cout << " -> " << hash.substr(0, 15) << " -> " << reduc;
 
 				}
-				//std::cout << std::endl;
+				std::cout << std::endl;
 				RainbowTable << reduc << std::endl;
 			}
 
@@ -106,13 +106,28 @@ int main(int argc, char *argv[]) {
 			if (hash.length() == 64) {
 				int i = length_chains;
 				std::string head = "";
+				std::cout << "++++++++++++++++++++++++" << std::endl;
+				std::cout << "Trying to find head ... " << std::endl;
+				std::cout << "++++++++++++++++++++++++" << std::endl;
 				while (i>=0 && head.empty()){
 
+					std::cout << "===============" << std::endl;
+					std::cout << "NEW WHILE ENTRY" << std::endl;
+					std::cout << "===============" << std::endl;
+					std::cout << "MAIN i : " << i << std::endl;
+					std::cout << "---------" << std::endl;
 					head = find_head(hash, RainbowTable, length_chains, i, password_length);
 					--i;
-					std::cout << "head " << i << " :" << hash << std::endl; 
+					std::cout << "------------" << std::endl;
+					std::cout << "MAIN HEAD : " << head << std::endl;
+					std::cout << "MAIN HASH : " << hash << std::endl;
+					std::cout << std::endl;
 				}
 
+				std::cout << std::endl;
+				std::cout << "++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+				std::cout << "Trying to find corresponding password ... " << std::endl;
+				std::cout << "++++++++++++++++++++++++++++++++++++++++++" << std::endl;
 				if (head.empty()){
 					std::cout << "password not found :/" << std::endl;
 				} else {
@@ -157,26 +172,40 @@ int main(int argc, char *argv[]) {
 
 
 std::string find_head(std::string& hash, std::ifstream& rainbow_table, unsigned length_chains, unsigned i, unsigned password_length) {
+	std::cout << "ARGUMENTS" << std::endl;
+	std::cout << "........." << std::endl;
+	std::cout << "hash : " << hash << std::endl;
+	std::cout << "i : " << i << std::endl;
+	std::cout << "password length : " << password_length << std::endl;
+	std::cout << "length_chains : " << length_chains << std::endl;
 	SHA256 sha256;
 	std::string reduction = reduce_hash(hash, i, password_length);
+	std::cout << "reduction : " << reduction << std::endl;
 	std::string rainbow_table_line;
 	std::string tail_of_rainbow_table;
 	const char delimiter = ';';
 
-	if (length_chains == 0){
+	if (length_chains == i){
+		std::cout << "length = 0" << std::endl;
 		return "";
 	}
 
 	i++;
 	while(getline(rainbow_table, rainbow_table_line)){
 		tail_of_rainbow_table = rainbow_table_line.substr(rainbow_table_line.find(delimiter)+1);
-
-		if(reduction == rainbow_table_line){
+		std::cout << "tail : " << tail_of_rainbow_table << std::endl;
+		
+		if(reduction.compare(tail_of_rainbow_table) == 0){
+			std::cout << "success" << std::endl;
 			return rainbow_table_line.substr(0, rainbow_table_line.find(delimiter));
 		}
 	}
+	rainbow_table.clear();
+	rainbow_table.seekg(0);
+	
 	reduction = sha256(reduction);
 
+	std::cout << std::endl;
 	return find_head(reduction, rainbow_table, length_chains, i, password_length);
 }
 
