@@ -3,19 +3,24 @@
 #include <cmath>
 #include "reduction.hpp"
 
-std::string reduce_hash(std::string& hash, int time_reduced, int passwd_length){
+std::string reduce_hash(std::string hash, int time_reduced, unsigned passwd_length){
 	std::string new_password = "";
 	unsigned long long int reduction;
-	unsigned long long number_of_passwd = std::lround(pow(56.0, static_cast<double>(passwd_length)));
+	unsigned long long number_of_passwd = std::lround(pow(62.0, static_cast<double>(passwd_length)));
 
 	hash.resize(16); // keep 16 first char of the string
 
+	// Conversion from hex to int
 	reduction = std::strtoull(hash.c_str(), nullptr, 16);
+	
+	// Doing formula
 	reduction += time_reduced;
 	reduction = reduction % number_of_passwd;
+	
+	// From int to ascii
 	new_password.append(std::to_string(reduction));
 
-	if (new_password.length() > 2 * passwd_length){
+	if (new_password.length() > 2 * passwd_length) {
 		new_password.substr(0, 2 * passwd_length);
 	} else {
 		padding_reduction(new_password, passwd_length);
@@ -26,12 +31,15 @@ std::string reduce_hash(std::string& hash, int time_reduced, int passwd_length){
 	return new_password;
 }
 
-inline void padding_reduction(std::string& new_password, int passwd_length) {
-	/*transform reduction into a string with a size of twice de password*/
-	std::string padding_chars= "000000000";
-	int padding = (2 * passwd_length) - new_password.size(); // number of 0 to add to our password
-	new_password.insert(0, padding_chars, 0, padding);
+inline void padding_reduction(std::string& new_password, unsigned passwd_length) {
+	// Transform reduction into a string with a size of twice de password
+	std::string padding_chars = "";
+	while (new_password.size() < passwd_length*2) {
+    	new_password += new_password;
+	}
 
+	padding_chars = new_password.substr(new_password.size() - passwd_length*2);
+	new_password = padding_chars;
 }
 
 inline std::string reduced_hash_to_new_password(std::string& new_password_as_digits){
@@ -41,7 +49,7 @@ inline std::string reduced_hash_to_new_password(std::string& new_password_as_dig
 								 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 								 "0123456789"; // size 62
 
-	for(int pos = 0; pos < new_password_as_digits.size(); pos+=2) {
+	for(unsigned pos = 0; pos < new_password_as_digits.size(); pos+=2) {
 		pair_of_digits = std::stoi(new_password_as_digits.substr(pos, 2));
 		pair_of_digits %= 62;
 		new_password.push_back(allowed_chars[pair_of_digits]);

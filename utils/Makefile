@@ -1,12 +1,12 @@
 CC=g++
 EXEC=sha256-main check-passwd gen-passwd main
-FLAGS = -std=c++17 -Wall # -Wpedantic -Wextra -Wconversion -Weffc++ -Wstrict-null-sentinel -Wold-style-cast -Wnoexcept -Wctor-dtor-privacy -Woverloaded-virtual -Wsign-promo -Wzero-as-null-pointer-constant -Wsuggest-final-types -Wsuggest-final-methods -Wsuggest-override
+FLAGS = -std=c++17 -Wall #-DDEBUG # -Wpedantic -Wextra -Wconversion -Weffc++ -Wstrict-null-sentinel -Wold-style-cast -Wnoexcept -Wctor-dtor-privacy -Woverloaded-virtual -Wsign-promo -Wzero-as-null-pointer-constant -Wsuggest-final-types -Wsuggest-final-methods -Wsuggest-override
 
 
 all: $(EXEC)
 
 main: main.o sha256.o reduction.o
-	$(CC) -o $@ $^ 
+	$(CC) -o $@ $^ -pthread
 
 sha256-main: sha256-main.o sha256.o reduction.o
 	$(CC) -o $@ $^
