@@ -1,91 +1,83 @@
-# SSD - Rainbow Table
+<h1 align="center"> SSD - Rainbow Table </h1>
 
+In the context of our Secure Software Design and Web Security course, we were asked to develop a rainbow table attack on a file containing passwords hashed with the cryptographic function sha256.
 
+## Built with
 
-## Getting started
+To complete this task, we needed to choose one of the fastest programming language and one that has access to libraries provided by our teacher (for simplicity reasons). Therefore, all of us agreed that the best solution for this assignment was to use C++ due to high performance it can provide.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### External libraries
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+During development, we used few libraries to make our work easier:
 
-## Add your files
-
-- [ ] [Create](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.com/Herrgrim0/ssd-rainbow-table.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/user/project/integrations/)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Automatically merge when pipeline succeeds](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://docs.gitlab.com/ee/user/clusters/agent/)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!).  Thank you to [makeareadme.com](https://gitlab.com/-/experiment/new_project_readme_content:170344a608d50d6e0d895ac8e1cf122c?https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+- [argparse](http://github.com/p-ranav/argparse): This library allows a better handling of our arguments
+- sha256, password-utils: Teacher's provided libraries to perform the hashing and generation of passwords
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+
+To install this project on your device, please follow theses commands :
+
+```bash
+$ git clone https://gitlab.com/Herrgrim0/ssd-rainbow-table.git
+$ cd ssd-rainbow-table/utils
+$ make
+$ ./main -h
+```
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+This program can be run in two different modes depending on the task you want to perform:
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### Generation
+To generate a rainbow table, you need to use this syntax
+```bash
+$ ./main --gen -r <file.csv>  -l <x> -p <x> -n <x>
+```
+Example :
+```bash
+$ ./main --gen -r rt.csv -l 10 -p 8 -n 5
+```
+This command will generate a rainbow table with the following specifications:
+```
+- Number of chains (n) = 5
+- Length of chains (l) = 10
+- Length of password (p) = 8
+- Rainbow table file (r) = rt.csv
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### Attack
+To attack a hash, you need to use the following syntax :
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+```bash
+$ ./main --atk -r <file.csv> -l <x> -p <x> -s <sha256>
+$ ./main --atk -r <file.csv> -l <x> -p <x> -S <sha256.txt>
+```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+Examples :
+```bash
+$ ./main --atk -r rt.csv -l 10 -p 8 -s f2d81a260dea8a100dd517984e53c56a7523d96942a834b9cdc249bd4e8c7aa9
+$ ./main --atk -r rt.csv -l 10 -p 8 -S hashes_to_crack.txt
+```
+Those commands will attack a hash or a file containing hashs where :
+```
+- Hash to crack (s) = f2d81a260dea8a100dd517984e53c56a7523d96942a834b9cdc249bd4e8c7aa9
+- Set of hashs to crack (S) = hashes_to_crack.txt
+- Length of chains (l) = 10
+- Length of password (p) = 8
+- Rainbow table file (r) = rt.csv
+```
+### Combine both commands
+In order to generate the rainbow table and attack a single hash after. You simply need to combine both commands with the operator `&&`
+```bash
+$ ./main --gen -r rt.csv -l 5 -p 8 -n 10 && ./main --atk -r rt.csv -l 5 -p 8 -s f2d81a260dea8a100dd517984e53c56a7523d96942a834b9cdc249bd4e8c7aa9
+```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Authors
+* **Romain Grimaru**
+* **Maximilien Laenen**
+* **Mehdi Laurent**
+* **Nathan Pembe Lemlin**
+* **Arkadiusz Snarski**
 
 ## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
-
+The project is available under the [MIT](https://opensource.org/licenses/MIT) license.
