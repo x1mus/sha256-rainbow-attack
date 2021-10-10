@@ -17,7 +17,7 @@
 void display_help(std::string&);
 void attack(std::string, std::string, unsigned, unsigned);
 void find_corresponding_password(std::string&, std::string&, unsigned, unsigned);
-std::string find_head(std::string&, std::ifstream&, unsigned, unsigned, unsigned);
+void find_head(std::string&, std::string, std::ifstream&, unsigned, unsigned, unsigned);
 
 int main(int argc, char *argv[]) {
 	argparse::ArgumentParser program("main");
@@ -164,6 +164,7 @@ void attack(std::string hash, std::string rb_file, unsigned length_chains, unsig
 
 	int i = length_chains;
 	std::string head = "";
+	std::thread find_threads[5];
 
 #ifdef DEBUG
 	std::cout << "++++++++++++++++++++++++" << std::endl
@@ -180,8 +181,14 @@ void attack(std::string hash, std::string rb_file, unsigned length_chains, unsig
 			<< "---------" << std::endl;
 #endif
 
-		head = find_head(hash, RainbowTable, length_chains, i, password_length);
-		--i;
+		//find_head(head, hash, RainbowTable, length_chains, i, password_length);
+		for (unsigned n = 0; n < 5; n++) {
+			find_threads[n] = std::thread(find_head, std::ref(head), hash, std::ref(RainbowTable), length_chains, i, password_length);
+			i--;
+		}
+		for (unsigned n = 0; n < 5; n++) {
+			find_threads[n].join();
+		}
 
 #ifdef DEBUG
 		std::cout << "------------" << std::endl
@@ -200,13 +207,13 @@ void attack(std::string hash, std::string rb_file, unsigned length_chains, unsig
 #endif
 
 	if (head.empty()){
-		std::cout << "password not found :/" << std::endl;
+		std::cout << hash << ":/" << std::endl;
 	} else {
 		find_corresponding_password(head, hash,0, password_length);
 	}
 }
 
-std::string find_head(std::string& hash, std::ifstream& rainbow_table, unsigned length_chains, unsigned i, unsigned password_length) {
+void find_head(std::string& head, std::string hash, std::ifstream& rainbow_table, unsigned length_chains, unsigned i, unsigned password_length) {
 #ifdef DEBUG
     std::cout << "ARGUMENTS" << std::endl
               << "###########" << std::endl
@@ -219,34 +226,31 @@ std::string find_head(std::string& hash, std::ifstream& rainbow_table, unsigned 
     std::string reduction;
     std::string rainbow_table_line;
     std::string tail_of_rainbow_table;
-    std::string new_hash = hash;
     const char delimiter = ';';
 
-    reduction = reduce_hash(new_hash, i, password_length);
+    reduction = reduce_hash(hash, i, password_length);
     while(i < length_chains) {
         while(getline(rainbow_table, rainbow_table_line)){
             tail_of_rainbow_table = rainbow_table_line.substr(rainbow_table_line.find(delimiter)+1);
         
             if(reduction.compare(tail_of_rainbow_table) == 0){
-                return rainbow_table_line.substr(0, rainbow_table_line.find(delimiter));
+                head = rainbow_table_line.substr(0, rainbow_table_line.find(delimiter));
             }
         }
         rainbow_table.clear();
         rainbow_table.seekg(0);
 
         i++;
-        new_hash = sha256(reduction);
-        reduction = reduce_hash(new_hash, i, password_length);
+        hash = sha256(reduction);
+        reduction = reduce_hash(hash, i, password_length);
     }
-
-    return "";
 }
 
 void find_corresponding_password(std::string& reduction, std::string& hash, unsigned i, unsigned password_length) {
 	SHA256 sha256;
 	std::string hashed = sha256(reduction);
 	if(hashed == hash) {
-		std::cout << "The corresponding password for " << hash << "is: " << reduction << std::endl;
+		std::cout << hash << ":" << reduction << std::endl;
 	} else {
 		hashed = reduce_hash(hashed, i, password_length);
 		find_corresponding_password(hashed, hash, ++i, password_length);
