@@ -6,7 +6,6 @@
 #include "reduction.hpp"
 #include "argparse.hpp"
 #include "passwd-utils.hpp"
-
 #include <thread>
 
 #ifdef DEBUG
@@ -28,14 +27,14 @@ int main(int argc, char *argv[]) {
 	program.add_argument("--atk").help("Launch an attack on a specified hash").default_value(false).implicit_value(true);
 
 	// "GEN" mode arguments
-	program.add_argument("-l", "--length_chains").help("Specify the length of the chains to generate (int)").scan<'i', unsigned>();
+	program.add_argument("-n", "--nb_chains").help("Specify the number of chains to generate (int)").scan<'i', unsigned>();
 	
 	// "ATK" mode arguments
 	program.add_argument("-s", "--sha256").help("Specify the hash to crack (str)");
 	program.add_argument("-S", "--sha256_file").help("Specify a file containing hashs to crack");
 
 	// BOTH mode arguments
-	program.add_argument("-n", "--nb_chains").help("Specify the number of chains to generate (int)").scan<'i', unsigned>();
+	program.add_argument("-l", "--length_chains").help("Specify the length of the chains to generate (int)").scan<'i', unsigned>();
 	program.add_argument("-r", "--rainbow_table").help("Specify the filename where you want the rainbow table to be generated (CSV)");
 	program.add_argument("-p", "--password_length").help("Specify password size").scan<'i', unsigned>();
 
@@ -120,13 +119,12 @@ int main(int argc, char *argv[]) {
 			std::ifstream to_crack(sha256_file);
 			std::string hash;
 
-			std::thread myThreads[100];
+			std::thread attack_threads[100];
 
 			unsigned i = 0;
 			while(getline(to_crack, hash)) {
 				if (hash.size() == 64) {
-					myThreads[i] = std::thread(attack, hash, rb_file, length_chains, password_length);
-					//attack(hash, rb_file, length_chains, password_length);
+					attack_threads[i] = std::thread(attack, hash, rb_file, length_chains, password_length);
 				} else {
 					std::cout << "Malformed hash" << std::endl;
 				}
@@ -135,7 +133,7 @@ int main(int argc, char *argv[]) {
 
 
 			while(i > 0) {
-       			myThreads[i-1].join();
+       			attack_threads[i-1].join();
        			i--;
     		}
 
