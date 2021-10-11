@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <cstring>
 #include "sha256.h"
 #include "reduction.hpp"
@@ -14,8 +15,9 @@
 # define D(x)
 #endif
 
+bool is_number(const std::string&);
 void display_help(std::string&);
-void attack(std::string, std::string, unsigned, unsigned);
+void attack(std::string, std::string, unsigned, unsigned, unsigned);
 void find_head(std::string&, std::string, std::ifstream&, unsigned, unsigned, unsigned);
 std::string find_corresponding_password(std::string&, std::string&, unsigned);
 
@@ -114,8 +116,26 @@ int main(int argc, char *argv[]) {
 		if (program.is_used("--sha256") == true) {
 			auto hash = program.get<std::string>("--sha256");
 
+			// Asking for the number of threads for each hashs
+			unsigned nb_thread;
+			std::string input;
+			std::cout << "How many threads do you want to start per hash [Default : 5] ? ";
+			std::getline(std::cin, input);
+			if (input.empty()) {
+				input = "5";
+			}
+			while (!is_number(input) || input == "0") {
+				std::cout << "How many threads do you want to start per hash [Default : 5] ? ";
+				std::getline(std::cin, input);
+				
+				if (input.empty()) {
+					input = "5";
+				}
+			}
+			nb_thread = std::stoul(input);
+
 			if (hash.size() == 64) {
-				attack(hash, rb_file, length_chains, password_length);
+				attack(hash, rb_file, length_chains, password_length, nb_thread);
 			} else {
 				std::cout << "Malformed hash" << std::endl;
 			}
@@ -124,24 +144,62 @@ int main(int argc, char *argv[]) {
 			auto sha256_file = program.get<std::string>("--sha256_file");
 			std::ifstream to_crack(sha256_file);
 			std::string hash;
-
-			std::thread attack_threads[100];
-
 			unsigned i = 0;
-			while(getline(to_crack, hash)) {
-				if (hash.size() == 64) {
-					attack_threads[i] = std::thread(attack, hash, rb_file, length_chains, password_length);
-				} else {
-					std::cout << "Malformed hash" << std::endl;
-				}
-				i++;
+			
+			// Asking if 1 thread/hash is active
+			std::string activate_thread;
+			std::cout << "Do you want to use 1 thread per hash [Y/n] ? ";
+    		std::getline(std::cin, activate_thread);
+			while (activate_thread != "y" && activate_thread != "" && activate_thread != "n") {
+				std::cout << "Do you want to use 1 thread per hash [Y/n] ? ";
+				std::getline(std::cin, activate_thread);
 			}
 
+			// Asking for the number of threads for each hashs
+			unsigned nb_thread;
+			std::string input;
+			std::cout << "How many threads do you want to start per hash [Default : 5] ? ";
+			std::getline(std::cin, input);
+			if (input.empty()) {
+				input = "5";
+			}
+			while (!is_number(input) || input == "0") {
+				std::cout << "How many threads do you want to start per hash [Default : 5] ? ";
+				std::getline(std::cin, input);
+				
+				if (input.empty()) {
+					input = "5";
+				}
+			}
+			nb_thread = std::stoul(input);
 
-			while(i > 0) {
-       			attack_threads[i-1].join();
-       			i--;
-    		}
+			// We start the attack
+			if (activate_thread == "n") {
+				while(getline(to_crack, hash)) {
+					if (hash.size() == 64) {
+						attack(hash, rb_file, length_chains, password_length, nb_thread);
+					} else {
+						std::cout << "Malformed hash" << std::endl;
+					}
+					i++;
+				}
+			} else {
+				std::thread attack_threads[100];
+				while(getline(to_crack, hash)) {
+					if (hash.size() == 64) {
+						attack_threads[i] = std::thread(attack, hash, rb_file, length_chains, password_length, nb_thread);
+					} else {
+						std::cout << "Malformed hash" << std::endl;
+					}
+					i++;
+				}
+
+
+				while(i > 0) {
+					attack_threads[i-1].join();
+					i--;
+				}
+			}
 
 			to_crack.close();
 		
@@ -156,6 +214,10 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
+bool is_number(const std::string& s) {
+	return !s.empty() && std::find_if(s.begin(), s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
+}
+
 void display_help(std::string& program) {
 	std::cout << "The correct way to use this program is :" << std::endl
 		<< "	./main --gen -r <rt.csv> -l <x> -p <x> -n <x>" << std::endl
@@ -164,14 +226,13 @@ void display_help(std::string& program) {
 	std::cout << program;
 }
 
-void attack(std::string hash, std::string rb_file, unsigned length_chains, unsigned password_length) {
+void attack(std::string hash, std::string rb_file, unsigned length_chains, unsigned password_length, unsigned nb_thread) {
 
 	std::ifstream RainbowTable(rb_file);
-	std::ofstream OutputFile("output.txt");
 
 	int i = length_chains;
 	std::string head = "";
-	std::thread find_threads[5];
+	std::thread find_threads[nb_thread];
 
 #ifdef DEBUG
 	std::cout << "++++++++++++++++++++++++" << std::endl
@@ -188,11 +249,11 @@ void attack(std::string hash, std::string rb_file, unsigned length_chains, unsig
 			<< "---------" << std::endl;
 #endif
 
-		for (unsigned n = 0; n < 5; n++) {
+		for (unsigned n = 0; n < nb_thread; n++) {
 			find_threads[n] = std::thread(find_head, std::ref(head), hash, std::ref(RainbowTable), length_chains, i, password_length);
 			i--;
 		}
-		for (unsigned n = 0; n < 5; n++) {
+		for (unsigned n = 0; n < nb_thread; n++) {
 			find_threads[n].join();
 		}
 
@@ -217,9 +278,8 @@ void attack(std::string hash, std::string rb_file, unsigned length_chains, unsig
 	} else {
 		result += find_corresponding_password(head, hash, password_length);
 	}
-
-	OutputFile << result << std::endl;
-	OutputFile.close();
+	
+	std::cout << result << std::endl;
 }
 
 void find_head(std::string& head, std::string hash, std::ifstream& rainbow_table, unsigned length_chains, unsigned i, unsigned password_length) {
