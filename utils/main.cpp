@@ -72,7 +72,9 @@ int main(int argc, char *argv[]) {
 			std::ifstream passwd_table("password.txt");
 			std::ofstream RainbowTable(rb_file);
 			while (getline(passwd_table, password)){
+#ifdef DEBUG
 				std::cout << "Password : " << password;
+#endif
 				password_length = strlen(password.c_str());
 				RainbowTable << password.c_str();
 				RainbowTable << ";";
@@ -80,10 +82,14 @@ int main(int argc, char *argv[]) {
 				for(unsigned nbr_hash_red = 0; nbr_hash_red < length_chains; ++nbr_hash_red){
 					hash = sha256(reduc);
 					reduc = reduce_hash(hash, nbr_hash_red, password_length);
+#ifdef DEBUG
 					std::cout << " -> " << hash.substr(0, 15) << " -> " << reduc;
+#endif
 
 				}
+#ifdef DEBUG
 				std::cout << std::endl;
+#endif
 				RainbowTable << reduc << std::endl;
 			}
 
@@ -181,7 +187,8 @@ void attack(std::string hash, std::string rb_file, unsigned length_chains, unsig
 			<< "---------" << std::endl;
 #endif
 
-		//find_head(head, hash, RainbowTable, length_chains, i, password_length);
+		/*find_head(head, hash, RainbowTable, length_chains, i, password_length);
+		i--;*/
 		for (unsigned n = 0; n < 5; n++) {
 			find_threads[n] = std::thread(find_head, std::ref(head), hash, std::ref(RainbowTable), length_chains, i, password_length);
 			i--;
