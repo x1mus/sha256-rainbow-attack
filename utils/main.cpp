@@ -22,6 +22,11 @@ void find_head(std::string&, std::string, std::ifstream&, unsigned, unsigned, un
 std::string find_corresponding_password(std::string&, std::string&, unsigned);
 
 int main(int argc, char *argv[]) {
+	/*
+	*	=====================
+	*	PARSING ALL ARGUMENTS	
+	*	=====================
+	*/
 	argparse::ArgumentParser program("main");
 
 	// Defining modes of working
@@ -51,28 +56,39 @@ int main(int argc, char *argv[]) {
 
 	std::string program_help = program.help().str();
 
-	// Figuring out which mode the user is using
 	if (program["--gen"] == true && program["--atk"] == true) {
 		display_help(program_help);
+	
+
+	/*
+	*	===============
+	*	GENERATION MODE
+	*	===============
+	*/
 	} else if (program["--gen"] == true) {
-		
-		// MODE == GEN --> We test the presence of all arguments
 		if (program.is_used("--nb_chains") == true && 
 			program.is_used("--length_chains") == true &&
 			program.is_used("--rainbow_table") == true &&
 			program.is_used("--password_length") == true) {
 			
+			// Params parsing
 			unsigned nb_chains = program.get<unsigned>("--nb_chains");
 			unsigned length_chains = program.get<unsigned>("--length_chains");
 			unsigned password_length = program.get<unsigned>("--password_length");
 			auto rb_file = program.get<std::string>("--rainbow_table");
+			
+			// Default variables
 			SHA256 sha256;
 			std::string password;
 			std::string reduc;
 			std::string hash;
+			
+			// Input and output stream + generations of passwords
 			rainbow::mass_generate(nb_chains, password_length, password_length, "password.txt");
 			std::ifstream passwd_table("password.txt");
 			std::ofstream RainbowTable(rb_file);
+			
+			// For each password we do all the required operations to generate
 			while (getline(passwd_table, password)){
 #ifdef DEBUG
 				std::cout << "Password : " << password;
@@ -95,7 +111,9 @@ int main(int argc, char *argv[]) {
 				RainbowTable << reduc << std::endl;
 			}
 
+			// We close every stream and delete the temp psswd file
 			passwd_table.close();
+			std::remove("password.txt");
 			RainbowTable.close();
 
 		} else {
@@ -103,43 +121,59 @@ int main(int argc, char *argv[]) {
 			std::cout << program;
 		}
 
+
+	/*
+	*	===========
+	*	ATTACK MODE
+	*	===========
+	*/
 	} else if (program["--atk"] == true &&
 		program.is_used("--rainbow_table") == true &&
 		program.is_used("--length_chains") == true &&
 		program.is_used("--password_length") == true) {
 
+		// Params parsing
 		auto rb_file = program.get<std::string>("--rainbow_table");
 		unsigned length_chains = program.get<unsigned>("--length_chains");
 		unsigned password_length = program.get<unsigned>("--password_length");
 		
-		// MODE == ATK
+		// Attack variable
+		unsigned nb_thread;
+		std::string input;
+
+
+		/*
+		*	===========
+		*	SINGLE HASH
+		*	===========
+		*/
 		if (program.is_used("--sha256") == true) {
 			auto hash = program.get<std::string>("--sha256");
 
 			// Asking for the number of threads for each hashs
-			unsigned nb_thread;
-			std::string input;
-			std::cout << "How many threads do you want to start per hash [Default : 5] ? ";
-			std::getline(std::cin, input);
-			if (input.empty()) {
-				input = "5";
-			}
-			while (!is_number(input) || input == "0") {
-				std::cout << "How many threads do you want to start per hash [Default : 5] ? ";
+			do {
+				std::cout << "How many threads do you want to start per hash [Default: 5] ? ";
 				std::getline(std::cin, input);
 				
 				if (input.empty()) {
 					input = "5";
 				}
-			}
+			} while (!is_number(input) || input == "0");
 			nb_thread = std::stoul(input);
 
+			// Little verification and then we start the attack
 			if (hash.size() == 64) {
 				attack(hash, rb_file, length_chains, password_length, nb_thread);
 			} else {
 				std::cout << "Malformed hash" << std::endl;
 			}
 
+
+		/*
+		*	==========
+		*	HASHS FILE
+		*	==========
+		*/
 		} else if (program.is_used("--sha256_file") == true) {
 			auto sha256_file = program.get<std::string>("--sha256_file");
 			std::ifstream to_crack(sha256_file);
@@ -148,29 +182,20 @@ int main(int argc, char *argv[]) {
 			
 			// Asking if 1 thread/hash is active
 			std::string activate_thread;
-			std::cout << "Do you want to use 1 thread per hash [Y/n] ? ";
-    		std::getline(std::cin, activate_thread);
-			while (activate_thread != "y" && activate_thread != "" && activate_thread != "n") {
+			do {
 				std::cout << "Do you want to use 1 thread per hash [Y/n] ? ";
 				std::getline(std::cin, activate_thread);
-			}
+			} while (activate_thread != "y" && activate_thread != "" && activate_thread != "n");
 
 			// Asking for the number of threads for each hashs
-			unsigned nb_thread;
-			std::string input;
-			std::cout << "How many threads do you want to start per hash [Default : 5] ? ";
-			std::getline(std::cin, input);
-			if (input.empty()) {
-				input = "5";
-			}
-			while (!is_number(input) || input == "0") {
-				std::cout << "How many threads do you want to start per hash [Default : 5] ? ";
+			do {
+				std::cout << "How many threads do you want to start per hash [Default: 5] ? ";
 				std::getline(std::cin, input);
 				
 				if (input.empty()) {
 					input = "5";
 				}
-			}
+			} while (!is_number(input) || input == "0");
 			nb_thread = std::stoul(input);
 
 			// We start the attack

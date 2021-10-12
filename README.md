@@ -77,13 +77,13 @@ $ ./main --gen -r rt.csv -l 5 -p 8 -n 10 && ./main --atk -r rt.csv -l 5 -p 8 -s 
 ```
 
 ### Threads *(only available for attack)*
-By default, this program starts 1 thread per hash if you provide a hashs file so you'll probably need some computation power.
+By default, this program starts 1 thread per hash if you provide a hashs file so you'll probably need some computation power. (*Note: the maximum number of hashs provided in a file is 100*)
 You can of course disable this option and it will run the program one hash at a time.
 Furthermore, you can also configure the number of thread launched for **EACH** hash.
 ```bash
 $ ./main --atk -r <file.csv>  -l <x> -p <x> -S <sha256.txt>
-	- Do you want to use 1 thread per hash \[Y/n\] ? 
-	- How many threads do you want to start per hash \[Default : 5\] ?
+	- Do you want to use 1 thread per hash [Y/n] ? 
+	- How many threads do you want to start per hash [Default: 5] ?
 ```
 
 If you leave everything on the default values the program will start `5*nb_of_hashs`. In the case of our project, this will probably generate 500 threads.
