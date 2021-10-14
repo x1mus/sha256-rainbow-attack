@@ -8,6 +8,7 @@
 #include "argparse.hpp"
 #include "passwd-utils.hpp"
 #include <thread>
+#include <mutex>
 
 #ifdef DEBUG
 # define D(x) x
@@ -17,9 +18,11 @@
 
 bool is_number(const std::string&);
 void display_help(std::string&);
-void attack(std::string, std::string, unsigned, unsigned, unsigned);
+void attack(std::string, std::string, unsigned, unsigned, unsigned, std::ofstream&);
 void find_head(std::string&, std::string, std::ifstream&, unsigned, unsigned, unsigned);
 std::string find_corresponding_password(std::string&, std::string&, unsigned);
+
+std::mutex write_result_mutex;
 
 int main(int argc, char *argv[]) {
 	/*
@@ -140,6 +143,8 @@ int main(int argc, char *argv[]) {
 		// Attack variable
 		unsigned nb_thread;
 		std::string input;
+		std::ofstream result_file;
+		result_file.open("result.txt");
 
 
 		/*
@@ -163,7 +168,7 @@ int main(int argc, char *argv[]) {
 
 			// Little verification and then we start the attack
 			if (hash.size() == 64) {
-				attack(hash, rb_file, length_chains, password_length, nb_thread);
+				attack(hash, rb_file, length_chains, password_length, nb_thread, result_file);
 			} else {
 				std::cout << "Malformed hash" << std::endl;
 			}
@@ -202,7 +207,7 @@ int main(int argc, char *argv[]) {
 			if (activate_thread == "n") {
 				while(getline(to_crack, hash)) {
 					if (hash.size() == 64) {
-						attack(hash, rb_file, length_chains, password_length, nb_thread);
+						attack(hash, rb_file, length_chains, password_length, nb_thread, result_file);
 					} else {
 						std::cout << "Malformed hash" << std::endl;
 					}
@@ -251,7 +256,7 @@ void display_help(std::string& program) {
 	std::cout << program;
 }
 
-void attack(std::string hash, std::string rb_file, unsigned length_chains, unsigned password_length, unsigned nb_thread) {
+void attack(std::string hash, std::string rb_file, unsigned length_chains, unsigned password_length, unsigned nb_thread, std::ofstream& result_file) {
 
 	std::ifstream RainbowTable(rb_file);
 
@@ -303,7 +308,9 @@ void attack(std::string hash, std::string rb_file, unsigned length_chains, unsig
 	} else {
 		result += find_corresponding_password(head, hash, password_length);
 	}
-	
+	write_result_mutex.lock();
+	result_file << result << std::endl;
+	write_result_mutex.unlock();
 	std::cout << result << std::endl;
 }
 
