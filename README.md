@@ -88,6 +88,9 @@ $ ./main --atk -r <file.csv>  -l <x> -p <x> -S <sha256.txt>
 
 If you leave everything on the default values the program will start `5*nb_of_hashs`. In the case of our project, this will probably generate 500 threads.
 
+### Results
+Results are displayed in the terminal and written in the file ````results.txt```
+
 ## Authors
 * **Romain Grimaru**
 * **Maximilien Laenen**
