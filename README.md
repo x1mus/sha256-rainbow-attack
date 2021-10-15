@@ -1,4 +1,4 @@
-<h1 align="center"> SSD - Rainbow Table </h1>
+# SSD - Rainbow Table
 
 In the context of our Secure Software Design and Web Security course, we were asked to develop a rainbow table attack on a file containing passwords hashed with the cryptographic function sha256.
 
@@ -77,8 +77,9 @@ $ ./main --gen -r rt.csv -l 5 -p 8 -n 10 && ./main --atk -r rt.csv -l 5 -p 8 -s 
 ```
 
 ### Threads *(only available for attack)*
-By default, this program starts 1 thread per hash if you provide a hashs file so you'll probably need some computation power. (*Note: the maximum number of hashs provided in a file is 100*)
-You can of course disable this option and it will run the program one hash at a time.
+By default, this program starts 1 thread per hash if you provide a hashs file so you'll probably need some computation power. <br>
+(*Note: the maximum number of hashs provided in a file is 100*) <br>
+You can of course disable this option and it will run the program one hash at a time. <br>
 Furthermore, you can also configure the number of thread launched for **EACH** hash.
 ```bash
 $ ./main --atk -r <file.csv>  -l <x> -p <x> -S <sha256.txt>
@@ -89,7 +90,7 @@ $ ./main --atk -r <file.csv>  -l <x> -p <x> -S <sha256.txt>
 If you leave everything on the default values the program will start `5*nb_of_hashs`. In the case of our project, this will probably generate 500 threads.
 
 ### Results
-Results are displayed in the terminal and written in the file ````results.txt```
+Results are displayed in the terminal and written in the file `results.txt`
 
 ## Authors
 * **Romain Grimaru**
