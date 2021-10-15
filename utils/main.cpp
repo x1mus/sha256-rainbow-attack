@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 		unsigned nb_thread;
 		std::string input;
 		std::ofstream result_file;
-		result_file.open("result.txt");
+		result_file.open("results.txt");
 
 
 		/*
@@ -311,7 +311,10 @@ void attack(std::string hash, std::string rb_file, unsigned length_chains, unsig
 	write_result_mutex.lock();
 	result_file << result << std::endl;
 	write_result_mutex.unlock();
+
+#ifdef DEBUG
 	std::cout << result << std::endl;
+#endif
 }
 
 void find_head(std::string& head, std::string hash, std::ifstream& rainbow_table, unsigned length_chains, unsigned i, unsigned password_length) {
