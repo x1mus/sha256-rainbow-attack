@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
 			if (activate_thread == "n") {
 				while(getline(to_crack, hash)) {
 					if (hash.size() == 64) {
-						attack(hash, rb_file, length_chains, password_length, nb_thread, result_file);
+						attack(hash, rb_file, length_chains, password_length, nb_thread, std::ref(result_file));
 					} else {
 						std::cout << "Malformed hash" << std::endl;
 					}
@@ -217,7 +217,7 @@ int main(int argc, char *argv[]) {
 				std::thread attack_threads[100];
 				while(getline(to_crack, hash)) {
 					if (hash.size() == 64) {
-						attack_threads[i] = std::thread(attack, hash, rb_file, length_chains, password_length, nb_thread);
+						attack_threads[i] = std::thread(attack, hash, rb_file, length_chains, password_length, nb_thread, std::ref(result_file));
 					} else {
 						std::cout << "Malformed hash" << std::endl;
 					}
