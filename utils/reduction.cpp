@@ -27,7 +27,7 @@ std::string reduce_hash(std::string hash, int time_reduced, unsigned passwd_leng
 	std::string output_as_str = convert_to_passwd(reduction); // map result to a string
 
 	int str_size_diff = passwd_length - output_as_str.length();
-	for (int i=0; i < output_as_str.length(); i++ ) {
+	for (unsigned i=0; i < output_as_str.length(); i++ ) {
         new_password[i+str_size_diff] = output_as_str[i];
     }
 
