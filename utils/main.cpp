@@ -260,7 +260,7 @@ void attack(std::string hash, std::string rb_file, unsigned length_chains, unsig
 
 	std::ifstream RainbowTable(rb_file);
 
-	int i = length_chains-1;
+	int i = length_chains;
 	std::string head = "";
 	std::thread find_threads[nb_thread];
 
