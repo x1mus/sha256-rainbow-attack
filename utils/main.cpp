@@ -280,7 +280,6 @@ void attack(std::string hash, std::string rb_file, unsigned length_chains, unsig
 #endif
 
 		for (unsigned n = 0; n < nb_thread; n++) {
-			std::cout << "thread : " << n << std::endl; 
 			find_threads[n] = std::thread(find_head, std::ref(head), hash, std::ref(RainbowTable), length_chains, i, password_length);
 			i--;
 		}
