@@ -260,7 +260,7 @@ void attack(std::string hash, std::string rb_file, unsigned length_chains, unsig
 
 	std::ifstream RainbowTable(rb_file);
 
-	int i = length_chains;
+	int i = length_chains-1;
 	std::string head = "";
 	std::thread find_threads[nb_thread];
 
@@ -353,11 +353,19 @@ void find_head(std::string& head, std::string hash, std::ifstream& rainbow_table
 std::string find_corresponding_password(std::string& reduction, std::string& hash, unsigned password_length) {
 	SHA256 sha256;
 	unsigned i = 0;
+	std::string hash_to_compare = hash;
+	hash_to_compare.resize(16);
+	
 	std::string hashed = sha256(reduction);
-
-	while (hashed != hash) {
+	std::string hashed_to_compare = hashed;
+	hashed_to_compare.resize(16);
+	
+	while (hashed_to_compare != hash_to_compare) {
 		reduction = reduce_hash(hashed, i, password_length);
 		hashed = sha256(reduction);
+		
+		hashed_to_compare = hashed;
+		hashed_to_compare.resize(16);
 		i++;
 	}
 
